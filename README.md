@@ -1,4 +1,5 @@
-accelerate-opencl
-=================
+MiniAcc
+=====
 
-Accelerate backend based on OpenCL
+
+This is a subset of the GPU programming Haskell DSL -- Accelerate ... 
