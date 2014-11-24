@@ -11,4 +11,7 @@ module AST where
 -- and also the low level corresponding infos.
 --
 -- However, we could just use the first part of function.
-data Acc 
+--
+
+data A_Exp  = A_Var
+            | A_
