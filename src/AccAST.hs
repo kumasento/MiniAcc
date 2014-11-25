@@ -16,6 +16,8 @@ data AccT   = AccTerm ArrayT
             | AccNode AccT      AccT
             deriving (Show)
 
+-- the result [String] is a mid repr
+
 parseAcc :: AccT -> [String]
 parseAcc (AccExpr f x) = [show f] ++ xs
     where
