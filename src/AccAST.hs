@@ -1,6 +1,10 @@
 module AccAST where
 
+import Data.Map as Map
+
 import AccType 
+import AccSymTable
+import AccCodeGen
 
 -- zipWith (+) A (zipWith (+) B C)
 -- A :: ArrayT
@@ -18,21 +22,56 @@ data AccT   = AccTerm ArrayT
 
 -- the result [String] is a mid repr
 
-parseAcc :: AccT -> [String]
-parseAcc (AccExpr f x) = [show f] ++ xs
+parseAcc :: AccT -> SymTable -> ([DeclRecord], SymTable)
+parseAcc (AccExpr f x) symTable = (xs, newSymTable)
     where
-        xs = case f of
-            ZipWith -> parseZipWith x
-parseAcc (AccTerm x)   = [show x]
-parseAcc (AccParm b x) = [show b] ++ (parseAcc x)
-parseAcc (AccNode x y) = (parseAcc x) ++ (parseAcc y)
+        (xs, newSymTable) = case f of
+            ZipWith -> parseZipWith x symTable
 
-parseZipWith :: AccT -> [String]
-parseZipWith (AccParm b (AccNode x y)) = 
-    [show b] ++ (parseAcc x) ++ (parseAcc y)
+parseAcc (AccTerm x) symTable   = 
+    ([lengthDecl, arrayDecl, arrTDecl], newSymTable3)
+    where 
+        (lenVarId, lenVarName, newSymTable1)    = insertSymTable symTable
+        (arrayId, arrayName, newSymTable2)      = insertSymTable newSymTable1
+        (arrTId, arrTName, newSymTable3)        = insertSymTable newSymTable2
+
+        lengthVal   = (show $ AccType.length x)
+        arrayVal    = array x
+        
+        lengthDecl  = SimpleVarDecl "int" lenVarName lengthVal
+        arrayDecl   = ArrayVarDecl "float" arrayName arrayVal
+        arrTDecl    =  
+            (ArrDecl "ArrayT*" arrTName "CreateArrayT" [lenVarName, arrayName])
+
+-- parseAcc (AccParm b x) symTable = [show b] ++ (parseAcc x symTable)
+
+parseAcc (AccNode x y) symTable = 
+    (resX ++ resY, newSymTable2)
+    where
+        (resX, newSymTable1) = (parseAcc x symTable) 
+        (resY, newSymTable2) = (parseAcc y newSymTable1)
+
+parseZipWith :: AccT -> SymTable -> ([DeclRecord], SymTable)
+parseZipWith (AccParm b (AccNode x y)) symTable = 
+    (decl1 ++ decl2 ++ [zipWithDecl], nSymT3)
+    where
+        (decl1, nSymT1)         = parseAcc x symTable
+        (decl2, nSymT2)         = parseAcc y nSymT1
+        (rId, rName, nSymT3)    = insertSymTable nSymT2
+
+        zipWithDecl = (ZipWithDecl 
+            "zipWith"
+            [ arrNameStr $ last decl1
+            , arrNameStr $ last decl2
+            , getBinopsName b]
+            rName
+            "ArrayT*" )
+
 
 use :: ArrayT -> AccT
 use a = AccTerm a
 
 zipWith :: BinopT -> AccT -> AccT -> AccT
 zipWith b x y = (AccExpr ZipWith (AccParm b (AccNode x y)))
+
+-- Test 
