@@ -21,6 +21,6 @@ runTwoArrays x y =
 main = do
     putStrLn "{"
     mapM_ putStrLn $ runTwoArrays 
-                        (ArrayT 2048 [1..2048])
-                        (ArrayT 2048 [1..2048])
+                        (ArrayT 128 [1..128])
+                        (ArrayT 128 [1..128])
     putStrLn "}"
