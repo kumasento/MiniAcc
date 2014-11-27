@@ -288,8 +288,8 @@ int initialization(cl_device_type deviceType, cl_device_id* devices, cl_context*
 
     if( errorCode == CL_SUCCESS )
     {
-	printf("Program File Name: %s\n", clFileName );
-	printf("---\n");
+	// printf("Program File Name: %s\n", clFileName );
+	// printf("---\n");
     }
 
     if( errorCode == CL_SUCCESS )
@@ -359,7 +359,7 @@ int initialization(cl_device_type deviceType, cl_device_id* devices, cl_context*
     if( errorCode == CL_SUCCESS )
     {
 	// Print the device info.
-	errorCode = PrintDeviceInfo(devices, numDevices);
+	//errorCode = PrintDeviceInfo(devices, numDevices);
     }
 
     if( errorCode == CL_SUCCESS )
@@ -405,9 +405,9 @@ int initialization(cl_device_type deviceType, cl_device_id* devices, cl_context*
 	    {
 		clGetProgramBuildInfo(*program, devices[ 0 ], CL_PROGRAM_BUILD_LOG, buildLogSize, buildLog, NULL );
 
-		printf(">>> Build Log:\n");
-		printf("%s\n", buildLog );
-		printf("<<< End of Build Log\n");
+		//printf(">>> Build Log:\n");
+		//printf("%s\n", buildLog );
+		//printf("<<< End of Build Log\n");
 	    }
 	}
     }

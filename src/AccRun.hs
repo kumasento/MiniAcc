@@ -1,4 +1,3 @@
-
 import AccType
 import AccCodeGen
 import AccAST
@@ -32,16 +31,33 @@ runThreeArrays x y z =
             (parseAcc (AccAST.zipWith Add x' (AccAST.zipWith Add y' z')) 
                         $ Map.empty))
 
-main = do
+exampleAccT :: AccT
+exampleAccT = 
+    let x' = use (ArrayT 128 [1..1024])
+        y' = use (ArrayT 128 [1..1024])
+        z' = use (ArrayT 128 [1..1024])
+    in
+    (AccAST.zipWith Add x' (AccAST.zipWith Add y' z'))
+
+exampleParseAccString :: AccT -> [String]
+exampleParseAccString x = 
+    Prelude.map AccCodeGen.genDecl xs
+    where
+        decls   = (parseAcc x $ Map.empty)
+        xs      = fst decls
+
+runAccMonad :: AccT -> IO [Double]
+runAccMonad x = do
     writeFile 
             "ExampleSolution.h" 
-            (genCodeBlock $ runThreeArrays 
-                    (ArrayT 128 [1..1024])
-                    (ArrayT 128 [1..1024])
-                    (ArrayT 128 [1..1024]))
+            (genCodeBlock $ exampleParseAccString x)
 
-    runCommand "make Example1 && ./Example1.o"
+    system "make Example1 2&>1"
+    system "./Example1.o"
     res <- readFile "ExampleOutput.dat"
-    
-    putStrLn res
-    
+   
+    return ((read res)::[Double])
+-- 
+-- run :: AccT -> [Double]
+-- run x = runMonad x
+

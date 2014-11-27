@@ -67,3 +67,8 @@ genDecl (ZipWithDecl x y z t) =
         , "("++(List.intercalate "," y)++")"
         , ";"])
 
+genDeclM :: [DeclRecord] -> [String]
+genDeclM xs = Prelude.map genDecl xs
+
+genCodeBlock :: [String] -> String
+genCodeBlock xs = "{\n" ++ (List.intercalate "\n" xs) ++ "}\n"

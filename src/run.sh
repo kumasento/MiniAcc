@@ -1,2 +1,14 @@
 #!/bin/bash
-ghc Main.hs && ./Main > ExampleSolution.h && make Example1 && ./Example1.o
+
+# -- compile new Main.hs
+echo "-- Compiling Main.hs ..."
+ghc Main.hs
+
+echo "-- Running Main.hs ... "
+./Main > ExampleSolution.h
+
+echo "-- Building New OpenCL Code ..."
+make Example1
+
+echo "-- Running OpenCL ..."
+./Example1.o

@@ -48,7 +48,7 @@ ArrayT * CreateArrayT(LenType len, ElmType* arr) {
 
 
 ArrayT * zipWith(ArrayT* arrT1, ArrayT* arrT2, char ops) {
-    cout << "-- zipWith" << endl;
+    // cout << "-- zipWith" << endl;
     ArrayT* ret = CreateEmptyArrayT(arrT1->len);
 
     cl_kernel kernel = 
@@ -85,11 +85,15 @@ ArrayT * zipWith(ArrayT* arrT1, ArrayT* arrT2, char ops) {
                     NULL,
                     NULL); CHECKERROR;
 
-    for (int i = 0; i < arrT1->len; i++) 
-        cout << "(" 
-             << arrT1->arr[i] << "+" 
-             << arrT2->arr[i] << ") => " 
-             << ret->arr[i] << endl;
+
+    FILE * fp = fopen("ExampleOutput.dat", "w");
+    fprintf(fp, "[");
+    for (int i = 0; i < ret->len; i++)  {
+        fprintf(fp, "%f", ret->arr[i]);
+        if (i != ret->len - 1) 
+            fprintf(fp, ",");
+    }
+    fprintf(fp, "]");
 
     return ret;
 }
