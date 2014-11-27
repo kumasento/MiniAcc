@@ -1,2 +1,1 @@
 g++ oclcommon.cpp Example1.cpp -o Example1.o -framework OpenCL
-make: *** No rule to make target `2'.  Stop.

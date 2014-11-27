@@ -52,9 +52,12 @@ runAccMonad x = do
             "ExampleSolution.h" 
             (genCodeBlock $ exampleParseAccString x)
 
-    system "make Example1 2&>1"
+    system "make Example1 > ExampleMakeResult"
     system "./Example1.o"
     res <- readFile "ExampleOutput.dat"
+
+    system "rm ExampleOutput.dat"
+    system "rm ExampleSolution.h"
    
     return ((read res)::[Double])
 -- 
