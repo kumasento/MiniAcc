@@ -56,8 +56,8 @@ runAccMonad x = do
     system "./Example1.o"
     res <- readFile "ExampleOutput.dat"
 
-    system "rm ExampleOutput.dat"
-    system "rm ExampleSolution.h"
+    -- system "rm ExampleOutput.dat"
+    -- system "rm ExampleSolution.h"
    
     return ((read res)::[Double])
 -- 
