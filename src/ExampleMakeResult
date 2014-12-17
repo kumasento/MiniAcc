@@ -1,1 +1,0 @@
-g++ oclcommon.cpp Example1.cpp -o Example1.o -framework OpenCL

@@ -11,3 +11,6 @@ cabal.sandbox.config
 cabal.config
 
 *.swp
+
+#special
+archive/

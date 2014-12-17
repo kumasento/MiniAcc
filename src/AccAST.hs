@@ -31,6 +31,9 @@ parseAcc (AccExpr f x) symTable = (xs, newSymTable)
 parseAcc (AccTerm x) symTable   = 
     ([lengthDecl, arrayDecl, arrTDecl], newSymTable3)
     where 
+        -- this part is confusing:
+        -- insertSymTable will do the symTable insertion and return the position, where it has been currenly inserted.
+
         (lenVarId, lenVarName, newSymTable1)    = insertSymTable symTable
         (arrayId, arrayName, newSymTable2)      = insertSymTable newSymTable1
         (arrTId, arrTName, newSymTable3)        = insertSymTable newSymTable2
