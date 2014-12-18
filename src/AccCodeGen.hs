@@ -39,21 +39,34 @@ data DeclRecord = SimpleVarDecl {
                     funcRetType :: String
                 } deriving (Show)
 
-genDecl :: DeclRecord -> String
+
+-- genDecl should return a tuple:
+-- 1. for real instructions
+-- 2. for data file
+--
+genDecl :: DeclRecord -> (String, String)
 genDecl (SimpleVarDecl varType varNameStr varValue) = 
-    varType ++ " " ++ varNameStr ++ " = " ++ varValue ++ ";"
+    (instStr, dataStr)
+    where
+        instStr = varType ++ " " ++ varNameStr ++ " = " ++ varValue ++ ";"
+        dataStr = ""
+
+-- change this function, put varValueStr in a new return
 
 genDecl (ArrayVarDecl x y z) = 
-    varTypePtr++" "++varNameStr++" = "++"{"++varValueStr++"};"
+    (instStr, dataStr)
     where
         varTypePtr  = x
         varValue    = z
         varListSize = List.length varValue
-        varNameStr  = y ++"["++(show varListSize)++"]"
-        varValueStr = List.intercalate "," $ map show varValue
+        varValueStr = List.intercalate " " $ map show varValue
+
+        instStr     = varTypePtr++" "++y++" = "
+                        ++"READ(\""++y++"\");"
+        dataStr     = y++":"++varValueStr
 
 genDecl (ArrDecl x y z t) = 
-    (List.intercalate " " [varTypePtr,varNameStr,"=",varFunc]) ++ ";"
+    ((List.intercalate " " [varTypePtr,varNameStr,"=",varFunc]) ++ ";", "")
     where
         varTypePtr  = x
         varNameStr  = y
@@ -62,13 +75,22 @@ genDecl (ArrDecl x y z t) =
         varFunc     = varFuncName ++ varParams
 
 genDecl (ZipWithDecl x y z t) = 
-    (List.intercalate " "
+    ((List.intercalate " "
         [ t, z, "=", x
         , "("++(List.intercalate "," y)++")"
-        , ";"])
+        , ";"]), "")
 
-genDeclM :: [DeclRecord] -> [String]
-genDeclM xs = Prelude.map genDecl xs
 
-genCodeBlock :: [String] -> String
-genCodeBlock xs = "{\n" ++ (List.intercalate "\n" xs) ++ "}\n"
+genCodeStrList :: [DeclRecord] -> ([String], [String])
+genCodeStrList xs = 
+    (rsx, rsy)
+    where
+        rs  = Prelude.map genDecl xs
+        rsx = Prelude.map fst rs
+        rsy = Prelude.map snd rs
+
+genCodeFileStr :: [String] -> String
+genCodeFileStr xs = "{\n" ++ (List.intercalate "\n" xs) ++ "\n}"
+
+genDataFileStr :: [String] -> String
+genDataFileStr xs = List.intercalate "\n" $ filter (\x -> x /= "") xs

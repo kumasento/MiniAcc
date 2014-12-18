@@ -42,7 +42,7 @@ parseAcc (AccTerm x) symTable   =
         arrayVal    = array x
         
         lengthDecl  = SimpleVarDecl "int" lenVarName lengthVal
-        arrayDecl   = ArrayVarDecl "float" arrayName arrayVal
+        arrayDecl   = ArrayVarDecl "float*" arrayName arrayVal
         arrTDecl    =  
             (ArrDecl "ArrayT*" arrTName "CreateArrayT" [lenVarName, arrayName])
 

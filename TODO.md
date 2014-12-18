@@ -1,5 +1,5 @@
 
-- [ ] Add symbol table;
+- [ ] Add symbol table(Monad);
 - [ ] Add scalar support;
 - [ ] Add fold support;
-- [ ] Add IO pipe support;
+- [x] Add IO pipe support;

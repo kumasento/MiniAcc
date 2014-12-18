@@ -1,60 +1,54 @@
+
+module AccRun where
+
 import AccType
 import AccCodeGen
 import AccAST
 import System.Process
 
+import Data.ByteString as BS
+import Data.List as List
 import Data.Map as Map
 
-addZipWith :: ArrayT -> ArrayT -> AccT
-addZipWith x y = 
-    let x' = use x
-        y' = use y
-    in
-    AccAST.zipWith Add x' y'
-
-runTwoArrays :: ArrayT -> ArrayT -> [String]
-runTwoArrays x y = 
-    Prelude.map AccCodeGen.genDecl (fst (parseAcc a $ Map.empty))
-    where
-        a = addZipWith x y
-
--- zipWith (+) A (zipWith (+) B C) => A + B + C
-
-runThreeArrays :: ArrayT -> ArrayT -> ArrayT -> [String]
-runThreeArrays x y z = 
-    let x' = use x
-        y' = use y
-        z' = use z
-    in
-    Prelude.map AccCodeGen.genDecl 
-        (fst 
-            (parseAcc (AccAST.zipWith Add x' (AccAST.zipWith Add y' z')) 
-                        $ Map.empty))
-
-exampleAccT :: AccT
-exampleAccT = 
-    let x' = use (ArrayT 128 [1..1024])
-        y' = use (ArrayT 128 [1..1024])
-        z' = use (ArrayT 128 [1..1024])
-    in
-    (AccAST.zipWith Add x' (AccAST.zipWith Add y' z'))
-
-exampleParseAccString :: AccT -> [String]
-exampleParseAccString x = 
-    Prelude.map AccCodeGen.genDecl xs
-    where
+parseAccStr :: AccT -> ([String], [String])
+parseAccStr x = 
+    AccCodeGen.genCodeStrList xs
+    where 
         decls   = (parseAcc x $ Map.empty)
         xs      = fst decls
 
+-- What runAccMonad should do is:
+-- 1. Take the root node of AST and run the iteration.
+-- 2. Output the iteration result to a outer header file.
+-- 3. Build OpenCL Program
+-- 4. Run
+-- 5. Read the result back
+
+oclSrcDir       = "../oclsrc/"
+oclSrcInclude   = oclSrcDir ++ "include/"
+oclSrcData      = oclSrcDir ++ "data/"
+
+headerFileName  = oclSrcInclude ++ "Solution.h"
+dataFileName    = oclSrcData ++ "Solution.dat"
+outFileName     = oclSrcData ++ "Output.dat"
+
 runAccMonad :: AccT -> IO [Double]
 runAccMonad x = do
-    writeFile 
-            "ExampleSolution.h" 
-            (genCodeBlock $ exampleParseAccString x)
+    let accStr = parseAccStr x
+    -- Write result to header file
+    Prelude.writeFile headerFileName $ (genCodeFileStr . fst) accStr
+    Prelude.writeFile dataFileName   $ (genDataFileStr . snd) accStr
 
-    system "make Example1 > ExampleMakeResult.tmp"
-    system "./Example1.o"
-    res <- readFile "ExampleOutput.dat"
+    let cmdStr = [ "cd ../oclsrc"
+                 , "make Main"         -- Build OpenCL program
+                 , "./bin/oclmain.o"   -- Run
+                 , "cd ../src" ]
+
+    let cmdStrLine = List.intercalate " && " cmdStr
+
+    system cmdStrLine
+    
+    res <- Prelude.readFile outFileName -- Read result back
 
     -- system "rm ExampleOutput.dat"
     -- system "rm ExampleSolution.h"
