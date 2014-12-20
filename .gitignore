@@ -10,6 +10,8 @@ cabal-dev
 cabal.sandbox.config
 cabal.config
 
+*.dat
+
 *.swp
 
 #special
