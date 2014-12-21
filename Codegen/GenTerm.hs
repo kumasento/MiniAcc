@@ -1,16 +1,22 @@
 module Codegen.GenTerm where
 
-import AST.Type.Vector
+import AST.Node
 import AST.Type.Scalar
+import AST.Type.Vector
 import Codegen.Const
 
 import Data.List as List
 
+vectorTypeToStr :: VectorType -> String
+vectorTypeToStr vectorType =
+    case vectorType of 
+        VectorTypeInteger    -> vecIntegerTypeStr
+        VectorTypeDouble     -> vecDoubleTypeStr
+        VectorTypeFloat      -> vecFloatTypeStr
+        VectorTypeChar       -> vecCharTypeStr
+
 vectorTypeStr :: Vector -> String
-vectorTypeStr (VectorDouble vec)    = "double*"
-vectorTypeStr (VectorInteger vec)   = "int*"
-vectorTypeStr (VectorChar vec)      = "char*"
-vectorTypeStr (VectorFloat vec)     = "float*"
+vectorTypeStr vector = vectorTypeToStr $ typeOfVector vector
 
 genCodeVector :: Vector -> String -> [String]
 genCodeVector vector nameStr =
@@ -21,11 +27,16 @@ genCodeVector vector nameStr =
             genFunction readFileStr [nameStr],
             semiOpStr]]
 
+scalarTypeToStr :: ScalarType -> String 
+scalarTypeToStr scalarType = 
+    case scalarType of
+        ScalarTypeInteger   -> intTypeStr
+        ScalarTypeDouble    -> doubleTypeStr
+        ScalarTypeFloat     -> floatTypeStr
+        ScalarTypeChar      -> charTypeStr
+
 scalarTypeStr :: Scalar -> String
-scalarTypeStr (ScalarInteger scalar)    = intTypeStr
-scalarTypeStr (ScalarDouble scalar)     = doubleTypeStr
-scalarTypeStr (ScalarFloat scalar)      = floatTypeStr
-scalarTypeStr (ScalarChar scalar)       = charTypeStr
+scalarTypeStr scalar = scalarTypeToStr $ typeOfScalar scalar
 
 scalarToStr :: Scalar -> String
 scalarToStr (ScalarInteger scalar)    = show scalar
@@ -42,3 +53,6 @@ genCodeScalar scalar nameStr =
             scalarToStr scalar, 
             semiOpStr]]
              
+typeToStr :: TermType -> String
+typeToStr (TermScalarType scalarType) = scalarTypeToStr scalarType
+typeToStr (TermVectorType vectorType) = vectorTypeToStr vectorType

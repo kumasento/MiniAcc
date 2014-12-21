@@ -6,6 +6,5 @@ data Binop  = BinopAdd
             | BinopDiv
             deriving (Show)
 
-data Operator = Binop
-                    
+data Operator = BinopOperator Binop
                 deriving (Show)

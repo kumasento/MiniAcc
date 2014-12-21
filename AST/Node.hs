@@ -8,14 +8,6 @@ import AST.Type.Scalar
 import AST.Function.Operator
 import AST.Function.Basic
 
--- please notice that the type array has been MOVED here!
--- it's a node in AST now
-
-data ASTArray   = 
-        ASTArray {
-            length :: ASTExpr,
-            vector :: ASTExpr
-        } deriving (Show)
 
 -- We could view all the AST nodes as a set of 3 subsets:
 -- 1. Subset of Term, which consists the node of Array, Vector and Scalar.
@@ -32,14 +24,16 @@ data ASTFunc    = ASTOperator   Operator
                 deriving (Show)
 
 data ASTExpr    = ASTTermExpr   ASTTerm
-                | ASTFuncExpr   ASTFunc
-                | ASTStructExpr ASTStruct
+                | ASTFuncExpr   ASTFunc [ASTExpr]
                 deriving (Show)
 
--- extra nodes:
--- 1. Struct: Including ASTArray
---
-data ASTStruct  = ASTStructArray ASTArray
-                deriving (Show)
-                
+data TermType   = TermScalarType    ScalarType
+                | TermVectorType    VectorType
+                deriving (Show, Eq)
+type TermName   = String
+
+-- type system
+typeOfTerm :: ASTTerm -> TermType
+typeOfTerm (ASTScalar scalar) = TermScalarType $ typeOfScalar scalar
+typeOfTerm (ASTVector vector) = TermVectorType $ typeOfVector vector
 

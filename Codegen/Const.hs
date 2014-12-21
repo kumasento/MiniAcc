@@ -5,10 +5,15 @@ import Data.List as List
 equalOpStr  = "="
 semiOpStr   = ";"
 
-intTypeStr      = "int"
 doubleTypeStr   = "double"
+intTypeStr      = "int"
 floatTypeStr    = "float"
 charTypeStr     = "char"
+
+vecIntegerTypeStr   = "int*"
+vecDoubleTypeStr    = "double*"
+vecFloatTypeStr     = "float*"
+vecCharTypeStr      = "char*"
 
 readFileStr     = "READ"
 

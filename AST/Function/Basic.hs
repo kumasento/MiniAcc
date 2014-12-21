@@ -1,6 +1,7 @@
 module AST.Function.Basic where
 
-data ZipWith = ZipWith2 | ZipWith3
+data ZipWith    = ZipWith2 
+                | ZipWith3
                 deriving (Show)
-data Basic  = ZipWith
+data Basic  = BasicZipWith ZipWith
             deriving (Show)

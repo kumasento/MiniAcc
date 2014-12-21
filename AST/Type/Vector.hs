@@ -12,3 +12,14 @@ data Vector = VectorDouble  [Double]
 
 nullVector = VectorNull :: Vector
 
+data VectorType = VectorTypeDouble
+                | VectorTypeInteger
+                | VectorTypeFloat
+                | VectorTypeChar
+                deriving (Show, Eq)
+
+typeOfVector :: Vector -> VectorType
+typeOfVector (VectorInteger vector) = VectorTypeInteger
+typeOfVector (VectorDouble  vector) = VectorTypeDouble
+typeOfVector (VectorFloat   vector) = VectorTypeFloat
+typeOfVector (VectorChar    vector) = VectorTypeChar

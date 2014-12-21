@@ -9,5 +9,16 @@ data Scalar = ScalarInteger Integer
             | ScalarDouble  Double
             | ScalarChar    Char
             | ScalarFloat   Float
-            deriving (Show)
- 
+            deriving (Show, Eq)
+
+data ScalarType = ScalarTypeInteger 
+                | ScalarTypeDouble
+                | ScalarTypeChar
+                | ScalarTypeFloat
+                deriving (Show, Eq)
+
+typeOfScalar :: Scalar -> ScalarType
+typeOfScalar (ScalarInteger scalar)     = ScalarTypeInteger
+typeOfScalar (ScalarDouble  scalar)     = ScalarTypeDouble
+typeOfScalar (ScalarFloat   scalar)     = ScalarTypeFloat
+typeOfScalar (ScalarChar    scalar)     = ScalarTypeChar
