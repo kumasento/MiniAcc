@@ -17,9 +17,9 @@ data DataTuple =
 
 nullDataTuple = DataTuple "" nullVector
 
-genData :: ASTTerm -> String -> DataTuple
-genData (ASTScalar scalar) nameStr = nullDataTuple
-genData (ASTVector vector) nameStr = DataTuple nameStr vector
+genData :: ASTTerm -> String -> [DataTuple]
+genData (ASTScalar scalar) nameStr = []
+genData (ASTVector vector) nameStr = [DataTuple nameStr vector]
 
 data Parser = 
         Parser {
@@ -36,7 +36,8 @@ initParser varPrefix =
 defaultParser = initParser "var_"
 
 parse :: ASTExpr -> Parser -> Parser
-parse (ASTTermExpr term) parser = parseTerm term parser
+parse (ASTTermExpr term) parser     = parseTerm term parser
+parse (ASTStructExpr struct) parser = parseStruct struct parser
 
 parseTerm :: ASTTerm -> Parser -> Parser
 parseTerm term parser = 
@@ -56,12 +57,25 @@ parseTerm term parser =
     where
         sym     = incSymTable $ symTable parser
         name    = topSymbol sym
+        -- @inst and @ptr are 2 result lists
         inst    = genCodeTerm term name
         ptr     = genData term name
 
-        insts   = instStack parser  ++ [inst]
-        ptrs    = ptrStack parser   ++ 
-                    if ptr == nullDataTuple then [] else [ptr]
+        insts   = instStack parser  ++ inst
+        ptrs    = ptrStack parser   ++ ptr
 
 exampleASTTermScalar = ASTScalar (ScalarInteger 1)
 exampleASTTermVector = ASTVector (VectorDouble [1..10])
+
+parseStruct :: ASTStruct -> Parser -> Parser
+parseStruct (ASTStructArray array) parser =
+    Parser name insts ptrs sym
+    where
+        parser1     = parse (length array) parser
+        parser2     = parse (vector array) parser1
+        
+        nameEval1   = nameEval parser1
+        nameEval2   = nameEval parser2
+        sym         = incSymTable $ symTable parser2
+        name        = topSymbol sym
+        inst        = genCode
