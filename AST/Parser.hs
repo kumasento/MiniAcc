@@ -118,7 +118,9 @@ exampleBinop2 =
         [ exampleBinop
         , exampleBinop]
 
+{-
 exampleZipWith2 = 
     ASTFuncExpr 
         (ASTBasic (BasicZipWith ZipWith2))
         [ (ASTFuncExpr -- How to distinguish ?
+-}
