@@ -6,6 +6,7 @@ import AST.Type.Vector
 import AST.Type.Scalar
 
 import AST.Function.Operator
+import AST.Function.Lambda
 import AST.Function.Basic
 
 
@@ -23,8 +24,15 @@ data ASTFunc    = ASTOperator   Operator
                 | ASTBasic      Basic
                 deriving (Show)
 
+data ASTLambda  = 
+        ASTLambda {
+            lambdaBody :: LambdaASTExpr,
+            lambdaName :: String, -- something like _lambda_defined_func_1
+        } deriving (Show)
+
 data ASTExpr    = ASTTermExpr   ASTTerm
                 | ASTFuncExpr   ASTFunc [ASTExpr]
+                | ASTLambdaExpr ASTLambda
                 deriving (Show)
 
 data TermType   = TermScalarType    ScalarType

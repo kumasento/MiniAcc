@@ -59,7 +59,8 @@ data ParserLambda =
         ParserLambda {
             retTuple    :: EvalLambda,
             instStack   :: [String],
-            symTable    :: SymbolTable
+            symTable    :: SymbolTable,
+            paramList   :: [String]
         }
         deriving (Show)
 
@@ -68,13 +69,18 @@ defaultParserLambdaVar =
         (EvalLambda LambdaInteger "")
         []
         (initSymTable "_lambda_var_")
+        []
 
 exampleLambdaASTExpr = LambdaASTExprTerm (LambdaASTTerm LambdaInteger "1")
 
+builtinParamStr = "_LAMBDA_PARAM_"
+
+isValueParam :: String -> Bool
+isValueParam str = isInfixOf builtinParamStr str
 
 parseLambdaBody :: LambdaASTExpr -> ParserLambda -> ParserLambda
 parseLambdaBody (LambdaASTExprTerm term) parser =
-    ParserLambda eval insts sym
+    ParserLambda eval insts sym params
     where
         sym     = incSymTable $ symTable parser
         name    = topSymbol sym
@@ -83,13 +89,18 @@ parseLambdaBody (LambdaASTExprTerm term) parser =
                     [ builtinTypeToStr (termType term)
                     , name
                     , equalOpStr
-                    , termValue term
-                    , semiOpStr ]] 
+                    , termValue term]
+                    ++ semiOpStr] 
+        val     = termValue term
         insts   = instStack parser ++ inst 
-
+        params  = paramList parser ++ 
+                    if isValueParam val 
+                        then [val]
+                        else []
+        
 
 parseLambdaBody (LambdaASTExprFunc func exprs) parser =
-    ParserLambda eval insts sym
+    ParserLambda eval insts sym params
     where
         ps      = parseLambdaBodyList exprs parser
         p       = last ps
@@ -106,15 +117,22 @@ parseLambdaBody (LambdaASTExprFunc func exprs) parser =
                     [ builtinTypeToStr t
                     , name
                     , equalOpStr
-                    , genFunction funcStr names
-                    , semiOpStr]]
+                    , genFunction funcStr names]
+                    ++ semiOpStr]
         insts   = instStack p ++ inst
+        params  = paramList p
 
 exampleLambdaASTFunc = 
     LambdaASTExprFunc
         (LambdaBuiltinFuncType LambdaFuncAdd)
         [ LambdaASTExprTerm (LambdaASTTerm LambdaInteger "1")
         , LambdaASTExprTerm (LambdaASTTerm LambdaInteger "2")]
+
+exampleLambdaASTFunc2 = 
+    LambdaASTExprFunc
+        (LambdaBuiltinFuncType LambdaFuncAdd)
+        [ LambdaASTExprTerm (LambdaASTTerm LambdaInteger $builtinParamStr++"1")
+        , LambdaASTExprTerm (LambdaASTTerm LambdaInteger $builtinParamStr++"2")]
 
 parseLambdaBodyList :: [LambdaASTExpr] -> ParserLambda -> [ParserLambda]
 parseLambdaBodyList (e:es) p = 

@@ -3,6 +3,7 @@ module AST.Parser where
 import AST.Type.Vector
 import AST.Type.Scalar
 import AST.Function.Operator
+import AST.Function.Lambda
 
 import AST.Node
 import AST.SymbolTable
@@ -45,6 +46,7 @@ defaultParser = initParser "var_"
 parse :: ASTExpr -> Parser -> Parser
 parse (ASTTermExpr term) parser = parseTerm term parser
 parse (ASTFuncExpr func exprs) parser = parseFunc func exprs parser    
+parse (ASTLambdaExpr lambda) parser = parseLambda lambda parser
 
 parseTerm :: ASTTerm -> Parser -> Parser
 parseTerm term parser = 
@@ -117,6 +119,20 @@ exampleBinop2 =
         (ASTOperator (BinopOperator BinopAdd))
         [ exampleBinop
         , exampleBinop]
+
+parseLambda :: ASTLambdaExpr -> Parser -> Parser
+parseLambda lambda parser =
+    
+    where
+        body        = lambdaBody lambda
+        funcStr     = lambdaName lambda
+        params      = paramList body
+        insts       = instStack body
+        eval        = retTuple body
+        typeStr     = builtinTypeToStr $ typeEval eval
+        
+        lambdaDecl  = genLambdaDecl funcStr typeStr params
+        
 
 {-
 exampleZipWith2 = 
