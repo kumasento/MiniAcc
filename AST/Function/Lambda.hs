@@ -1,6 +1,7 @@
 module AST.Function.Lambda where
 
 import AST.SymbolTable
+import AST.Type.Scalar
 import Codegen.Const
 import Data.List as List
 
@@ -24,6 +25,13 @@ builtinTypeToStr t =
     case t of
         LambdaInteger   -> "int"
         LambdaDouble    -> "double"
+
+builtinTypeToScalarType :: LambdaBuiltinType -> ScalarType
+builtinTypeToScalarType t =
+    case t of 
+        LambdaInteger   -> ScalarTypeInteger
+        LambdaDouble    -> ScalarTypeDouble
+
 builtinFuncToStr :: LambdaBuiltinFunc -> String
 builtinFuncToStr f =
     case f of
@@ -51,16 +59,16 @@ funcToStr (LambdaBuiltinFuncType f) = builtinFuncToStr f
 
 data EvalLambda = 
         EvalLambda {
-            typeEval :: LambdaBuiltinType,
-            nameEval :: String
+            typeEvalL :: LambdaBuiltinType,
+            nameEvalL :: String
         } deriving (Show)
 
 data ParserLambda =
         ParserLambda {
-            retTuple    :: EvalLambda,
-            instStack   :: [String],
-            symTable    :: SymbolTable,
-            paramList   :: [String]
+            retTupleL    :: EvalLambda,
+            instStackL   :: [String],
+            symTableL    :: SymbolTable,
+            paramListL   :: [String]
         }
         deriving (Show)
 
@@ -82,7 +90,7 @@ parseLambdaBody :: LambdaASTExpr -> ParserLambda -> ParserLambda
 parseLambdaBody (LambdaASTExprTerm term) parser =
     ParserLambda eval insts sym params
     where
-        sym     = incSymTable $ symTable parser
+        sym     = incSymTable $ symTableL parser
         name    = topSymbol sym
         eval    = EvalLambda (termType term) name
         inst    = [List.intercalate " "
@@ -92,8 +100,8 @@ parseLambdaBody (LambdaASTExprTerm term) parser =
                     , termValue term]
                     ++ semiOpStr] 
         val     = termValue term
-        insts   = instStack parser ++ inst 
-        params  = paramList parser ++ 
+        insts   = instStackL parser ++ inst 
+        params  = paramListL parser ++ 
                     if isValueParam val 
                         then [val]
                         else []
@@ -105,12 +113,12 @@ parseLambdaBody (LambdaASTExprFunc func exprs) parser =
         ps      = parseLambdaBodyList exprs parser
         p       = last ps
 
-        sym     = incSymTable $ symTable p
+        sym     = incSymTable $ symTableL p
         name    = topSymbol sym
-        t       = typeEval $ retTuple p
+        t       = typeEvalL $ retTupleL p
         eval    = EvalLambda t name
 
-        names   = map (nameEval . retTuple) ps
+        names   = map (nameEvalL . retTupleL) ps
         funcStr = funcToStr func
         
         inst    = [List.intercalate " "
@@ -119,8 +127,8 @@ parseLambdaBody (LambdaASTExprFunc func exprs) parser =
                     , equalOpStr
                     , genFunction funcStr names]
                     ++ semiOpStr]
-        insts   = instStack p ++ inst
-        params  = paramList p
+        insts   = instStackL p ++ inst
+        params  = paramListL p
 
 exampleLambdaASTFunc = 
     LambdaASTExprFunc

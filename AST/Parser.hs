@@ -31,17 +31,25 @@ nullEvalTuple = EvalTuple "" (TermScalarType ScalarTypeInteger) -- assume
 
 data Parser = 
         Parser {
-            retTuple    :: EvalTuple,   -- The evaluation result. force single 
-            instStack   :: [String],    -- Stack of instructions
-            ptrStack    :: [DataTuple], -- Stack of vector pointers
-            symTable    :: SymbolTable
+            retTuple        :: EvalTuple,   -- The evaluation result. force single 
+            instStack       :: [String],    -- Stack of instructions
+            ptrStack        :: [DataTuple], -- Stack of vector pointers
+            symTable        :: SymbolTable,
+            funcSymTable    :: SymbolTable,
+            lambdaStack     :: [[String]]
         } deriving (Show)
 
 initParser :: String -> Parser
-initParser varPrefix = 
-    Parser nullEvalTuple [] [] $ initSymTable varPrefix
+initParser varPrefix funPrefix = 
+    Parser 
+        nullEvalTuple 
+        [] 
+        [] 
+        (initSymTable varPrefix)
+        (initSymTable funPrefix)
+        [[]]
 
-defaultParser = initParser "var_"
+defaultParser = initParser "_var_" "_lambda_fun_"
 
 parse :: ASTExpr -> Parser -> Parser
 parse (ASTTermExpr term) parser = parseTerm term parser
@@ -62,7 +70,7 @@ parseTerm term parser =
     -- 4 step: build new parser
     --
     -- so we'll need to integrate those things
-    Parser eval insts ptrs sym
+    Parser eval insts ptrs sym fsym ls
     where
         sym     = incSymTable $ symTable parser
         nameTerm= topSymbol sym
@@ -75,6 +83,9 @@ parseTerm term parser =
 
         insts   = instStack parser  ++ inst
         ptrs    = ptrStack parser   ++ ptr
+
+        fsym    = funcSymTable parser
+        ls      = lambdaStack parser
 
 exampleASTTermScalar = ASTScalar (ScalarInteger 1)
 exampleASTTermVector = ASTVector (VectorDouble [1..10])
@@ -92,7 +103,7 @@ parseFunc func exprs parser =
     -- 1 step: recognize which function it is.
     -- 2 step: parse each expr and check the parsed result
     -- 3 
-    Parser eval insts ptrs sym
+    Parser eval insts ptrs sym fsym ls
     where
         parserList  = parseExprList exprs parser
         parserLast  = last parserList
@@ -108,6 +119,9 @@ parseFunc func exprs parser =
         insts       = instStack parserLast ++ inst
         ptrs        = ptrStack parserLast
 
+        fsym        = funcSymTable parser
+        ls          = lambdaStack parser
+
 exampleBinop = 
     ASTFuncExpr 
         (ASTOperator (BinopOperator BinopAdd))
@@ -120,19 +134,38 @@ exampleBinop2 =
         [ exampleBinop
         , exampleBinop]
 
-parseLambda :: ASTLambdaExpr -> Parser -> Parser
+parseLambda :: ASTLambda -> Parser -> Parser
 parseLambda lambda parser =
-    
+    -- ok here we'll have 2 symbol table. 1 for var, 1 for func
+    Parser leval insts ptrs sym fsym ls 
     where
         body        = lambdaBody lambda
-        funcStr     = lambdaName lambda
-        params      = paramList body
-        insts       = instStack body
-        eval        = retTuple body
-        typeStr     = builtinTypeToStr $ typeEval eval
+
+        fsym        = incSymTable $ funcSymTable parser
+        fstr        = topSymbol fsym
+        params      = paramListL body
+        instsL      = instStackL body
+        eval        = retTupleL body
+        nameStr     = nameEvalL eval
+        typeStr     = builtinTypeToStr $ typeEvalL eval
         
-        lambdaDecl  = genLambdaDecl funcStr typeStr params
+        -- [typeStr] [fstr] ([params])
+        lambdaDecl  = genLambdaDecl fstr typeStr params
+        -- return [nameStr]
+        lambdaRet   = genLambdaRet nameStr
+        lambdaBody  = instsL
+
+        lambdaFunc  = genLambdaFunc lambdaDecl lambdaBody lambdaRet
+        ls          = lambdaStack parser ++ lambdaFunc
         
+        termType    = TermScalarType (builtinTypeToScalarType $ typeEval eval)
+
+        -- parseLambda should return [returnType] and the [functionName]
+        leval       = EvalTuple termType fstr
+        insts       = instStack parser
+        ptrs        = ptrStack parser
+        sym         = symTable parser
+
 
 {-
 exampleZipWith2 = 

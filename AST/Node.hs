@@ -26,8 +26,7 @@ data ASTFunc    = ASTOperator   Operator
 
 data ASTLambda  = 
         ASTLambda {
-            lambdaBody :: LambdaASTExpr,
-            lambdaName :: String, -- something like _lambda_defined_func_1
+            lambdaBody :: LambdaASTExpr
         } deriving (Show)
 
 data ASTExpr    = ASTTermExpr   ASTTerm

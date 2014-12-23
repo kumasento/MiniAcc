@@ -55,4 +55,9 @@ genCodeFunc func t n ps =
         n
         (funcToStr func)
         ps
+
+-- params should have types
+genLambdaDecl :: String -> String -> [(String, String)] -> [String]
+genLambdaDecl fstr typeStr params = 
+    genFunction fstr 
     
