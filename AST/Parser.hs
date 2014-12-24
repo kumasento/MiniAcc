@@ -39,7 +39,7 @@ data Parser =
             lambdaStack     :: [[String]]
         } deriving (Show)
 
-initParser :: String -> Parser
+initParser :: String -> String -> Parser
 initParser varPrefix funPrefix = 
     Parser 
         nullEvalTuple 
@@ -47,7 +47,7 @@ initParser varPrefix funPrefix =
         [] 
         (initSymTable varPrefix)
         (initSymTable funPrefix)
-        [[]]
+        []
 
 defaultParser = initParser "_var_" "_lambda_fun_"
 
@@ -139,33 +139,36 @@ parseLambda lambda parser =
     -- ok here we'll have 2 symbol table. 1 for var, 1 for func
     Parser leval insts ptrs sym fsym ls 
     where
-        body        = lambdaBody lambda
-
-        fsym        = incSymTable $ funcSymTable parser
-        fstr        = topSymbol fsym
-        params      = paramListL body
-        instsL      = instStackL body
-        eval        = retTupleL body
-        nameStr     = nameEvalL eval
-        typeStr     = builtinTypeToStr $ typeEvalL eval
+        body        = parseLambdaBody 
+                        (lambdaBody lambda)
+                        defaultParserLambdaVar
+        fsym        = incSymTable       $ funcSymTable parser
+        fstr        = topSymbol         fsym
+        params      = paramListL        body
+        instsL      = instStackL        body
+        eval        = retTupleL         body
+        nameStr     = nameEvalL         eval
+        typeStr     = builtinTypeToStr  $ typeEvalL eval
         
         -- [typeStr] [fstr] ([params])
         lambdaDecl  = genLambdaDecl fstr typeStr params
         -- return [nameStr]
         lambdaRet   = genLambdaRet nameStr
-        lambdaBody  = instsL
 
-        lambdaFunc  = genLambdaFunc lambdaDecl lambdaBody lambdaRet
-        ls          = lambdaStack parser ++ lambdaFunc
+        lambdaFunc  = genLambdaFunc lambdaDecl instsL lambdaRet
+        ls          = lambdaStack parser ++ [lambdaFunc]
         
-        termType    = TermScalarType (builtinTypeToScalarType $ typeEval eval)
+        termType    = TermScalarType (builtinTypeToScalarType $ typeEvalL eval)
 
         -- parseLambda should return [returnType] and the [functionName]
-        leval       = EvalTuple termType fstr
+        leval       = EvalTuple fstr termType
         insts       = instStack parser
         ptrs        = ptrStack parser
         sym         = symTable parser
 
+exampleLambda = 
+    ASTLambdaExpr 
+        (ASTLambda exampleLambdaASTFunc2)
 
 {-
 exampleZipWith2 = 

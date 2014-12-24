@@ -68,7 +68,7 @@ data ParserLambda =
             retTupleL    :: EvalLambda,
             instStackL   :: [String],
             symTableL    :: SymbolTable,
-            paramListL   :: [String]
+            paramListL   :: [(String, String)]
         }
         deriving (Show)
 
@@ -93,8 +93,9 @@ parseLambdaBody (LambdaASTExprTerm term) parser =
         sym     = incSymTable $ symTableL parser
         name    = topSymbol sym
         eval    = EvalLambda (termType term) name
+        typeStr = builtinTypeToStr (termType term)
         inst    = [List.intercalate " "
-                    [ builtinTypeToStr (termType term)
+                    [ typeStr
                     , name
                     , equalOpStr
                     , termValue term]
@@ -103,7 +104,7 @@ parseLambdaBody (LambdaASTExprTerm term) parser =
         insts   = instStackL parser ++ inst 
         params  = paramListL parser ++ 
                     if isValueParam val 
-                        then [val]
+                        then [(typeStr, val)]
                         else []
         
 

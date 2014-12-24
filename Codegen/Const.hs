@@ -4,6 +4,9 @@ import Data.List as List
 
 equalOpStr  = "="
 semiOpStr   = ";"
+returnStr   = "return"
+lbOpStr     = "{"
+rbOpStr     = "}"
 
 doubleTypeStr   = "double"
 intTypeStr      = "int"

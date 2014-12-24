@@ -56,8 +56,26 @@ genCodeFunc func t n ps =
         (funcToStr func)
         ps
 
+genLambdaParamList :: [(String, String)] -> [String]
+genLambdaParamList [] = []
+genLambdaParamList ((t, v):ps) = (t ++ " " ++ v) : genLambdaParamList ps 
+
 -- params should have types
 genLambdaDecl :: String -> String -> [(String, String)] -> [String]
 genLambdaDecl fstr typeStr params = 
-    genFunction fstr 
+    [List.intercalate " "
+        [ typeStr 
+        , (genFunction 
+            fstr
+            (genLambdaParamList params))]]
     
+genLambdaRet :: String -> [String]
+genLambdaRet nameStr = 
+    [List.intercalate " "
+        [ returnStr
+        , nameStr]
+        ++ semiOpStr]
+
+genLambdaFunc :: [String] -> [String] -> [String] -> [String]
+genLambdaFunc decl body ret = 
+    decl ++ [lbOpStr] ++ body ++ ret ++ [rbOpStr]
