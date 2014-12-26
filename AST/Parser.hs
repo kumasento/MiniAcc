@@ -4,6 +4,7 @@ import AST.Type.Vector
 import AST.Type.Scalar
 import AST.Function.Operator
 import AST.Function.Lambda
+import AST.Function.Basic
 
 import AST.Node
 import AST.SymbolTable
@@ -119,8 +120,8 @@ parseFunc func exprs parser =
         insts       = instStack parserLast ++ inst
         ptrs        = ptrStack parserLast
 
-        fsym        = funcSymTable parser
-        ls          = lambdaStack parser
+        fsym        = funcSymTable parserLast
+        ls          = lambdaStack parserLast
 
 exampleBinop = 
     ASTFuncExpr 
@@ -166,13 +167,19 @@ parseLambda lambda parser =
         ptrs        = ptrStack parser
         sym         = symTable parser
 
+exampleLambdaAST = 
+    LambdaASTExprFunc
+        (LambdaBuiltinFuncType LambdaFuncAdd)
+        [ LambdaASTExprTerm (LambdaASTTerm LambdaInteger $builtinParamStr++"1")
+        , LambdaASTExprTerm (LambdaASTTerm LambdaInteger $builtinParamStr++"2")]
+
 exampleLambda = 
     ASTLambdaExpr 
-        (ASTLambda exampleLambdaASTFunc2)
+        (ASTLambda exampleLambdaAST)
 
-{-
 exampleZipWith2 = 
     ASTFuncExpr 
         (ASTBasic (BasicZipWith ZipWith2))
-        [ (ASTFuncExpr -- How to distinguish ?
--}
+        [ exampleLambda
+        , (ASTTermExpr (ASTVector (VectorDouble [1.0..10.0])))
+        , (ASTTermExpr (ASTVector (VectorDouble [1.0..10.0])))]

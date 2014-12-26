@@ -13,11 +13,11 @@ import Data.List as List
 genCodeFuncStr :: String -> String -> String -> [String] -> [String]
 genCodeFuncStr t n f ps =
     [List.intercalate " "
-        [   t,
-            n,
-            equalOpStr,
-            genFunction f ps,
-            semiOpStr]]
+        [ t
+        , n
+        , equalOpStr
+        , genFunction f ps]
+        ++ semiOpStr]
 
 binopAddStr = "_binop_add"
 binopSubStr = "_binop_sub"

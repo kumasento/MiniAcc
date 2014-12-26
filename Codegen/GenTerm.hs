@@ -21,11 +21,11 @@ vectorTypeStr vector = vectorTypeToStr $ typeOfVector vector
 genCodeVector :: Vector -> String -> [String]
 genCodeVector vector nameStr =
     [List.intercalate " "
-        [   vectorTypeStr vector,
-            nameStr,
-            equalOpStr,
-            genFunction readFileStr [nameStr],
-            semiOpStr]]
+        [ vectorTypeStr vector
+        , nameStr
+        , equalOpStr
+        , genFunction readFileStr [nameStr]]
+         ++ semiOpStr]
 
 scalarTypeToStr :: ScalarType -> String 
 scalarTypeToStr scalarType = 
@@ -47,11 +47,11 @@ scalarToStr (ScalarChar scalar)       = show scalar
 genCodeScalar :: Scalar -> String -> [String]
 genCodeScalar scalar nameStr =
     [List.intercalate " " 
-        [   scalarTypeStr scalar,
-            nameStr, 
-            equalOpStr, 
-            scalarToStr scalar, 
-            semiOpStr]]
+        [ scalarTypeStr scalar
+        , nameStr
+        , equalOpStr 
+        , scalarToStr scalar]
+          ++ semiOpStr]
              
 typeToStr :: TermType -> String
 typeToStr (TermScalarType scalarType) = scalarTypeToStr scalarType

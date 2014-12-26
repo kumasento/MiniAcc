@@ -137,11 +137,6 @@ exampleLambdaASTFunc =
         [ LambdaASTExprTerm (LambdaASTTerm LambdaInteger "1")
         , LambdaASTExprTerm (LambdaASTTerm LambdaInteger "2")]
 
-exampleLambdaASTFunc2 = 
-    LambdaASTExprFunc
-        (LambdaBuiltinFuncType LambdaFuncAdd)
-        [ LambdaASTExprTerm (LambdaASTTerm LambdaInteger $builtinParamStr++"1")
-        , LambdaASTExprTerm (LambdaASTTerm LambdaInteger $builtinParamStr++"2")]
 
 parseLambdaBodyList :: [LambdaASTExpr] -> ParserLambda -> [ParserLambda]
 parseLambdaBodyList (e:es) p = 
